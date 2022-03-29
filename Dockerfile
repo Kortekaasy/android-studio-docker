@@ -1,15 +1,16 @@
-FROM ubuntu:18.04
+FROM ubuntu:21.10
 
-MAINTAINER Simon Egli <docker_android_studio_860dd6@egli.online>
+LABEL org.opencontainers.image.authors="docker_android_studio_860dd6@egli.online, yoep.kortekaas@gmail.com"
+
 
 ARG USER=android
 
 RUN dpkg --add-architecture i386
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential git neovim wget unzip sudo \
         libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386 \
         libxrender1 libxtst6 libxi6 libfreetype6 libxft2 \
-        qemu qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils libnotify4 libglu1 libqt5widgets5 openjdk-8-jdk xvfb \
+        qemu qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils libnotify4 libglu1 libqt5widgets5 openjdk-8-jdk xvfb \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -39,7 +40,7 @@ WORKDIR /home/$USER
 ARG ANDROID_STUDIO_URL=https://dl.google.com/dl/android/studio/ide-zips/3.5.3.0/android-studio-ide-191.6010548-linux.tar.gz
 ARG ANDROID_STUDIO_VERSION=3.5
 
-RUN wget "$ANDROID_STUDIO_URL" -O android-studio.tar.gz
+RUN wget --no-verbose "$ANDROID_STUDIO_URL" -O android-studio.tar.gz
 RUN tar xzvf android-studio.tar.gz
 RUN rm android-studio.tar.gz
 
@@ -52,4 +53,4 @@ ENV ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
 
 WORKDIR /home/$USER
 
-ENTRYPOINT [ "/usr/local/bin/docker_entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/docker_entrypoint.sh"]
