@@ -33,17 +33,29 @@ COPY provisioning/ndkTests.sh /usr/local/bin/ndkTests.sh
 RUN chmod +x /usr/local/bin/*
 COPY provisioning/51-android.rules /etc/udev/rules.d/51-android.rules
 
+### Android Studio Install
+# Set user to $USER
 USER $USER
 
+# Change to $USER's homedir
 WORKDIR /home/$USER
 
-ARG ANDROID_STUDIO_URL=https://dl.google.com/dl/android/studio/ide-zips/3.5.3.0/android-studio-ide-191.6010548-linux.tar.gz
-ARG ANDROID_STUDIO_VERSION=3.5
+# Android Studio version
+ENV ANDROID_STUDIO_VERSION=2021.1.1.22
 
-RUN wget --no-verbose "$ANDROID_STUDIO_URL" -O android-studio.tar.gz
-RUN tar xzvf android-studio.tar.gz
-RUN rm android-studio.tar.gz
+# Download Android Studio binary
+RUN wget --no-verbose https://dl.google.com/dl/android/studio/ide-zips/${ANDROID_STUDIO_VERSION}/android-studio-${ANDROID_STUDIO_VERSION}-linux.tar.gz
 
+# Unpack Android Studio tar
+RUN tar xf android-studio-${ANDROID_STUDIO_VERSION}-linux.tar.gz
+
+# Remove Android Studio tar
+RUN rm android-studio-${ANDROID_STUDIO_VERSION}-linux.tar.gz
+
+# Add android studio to path
+ENV PATH="${PATH}:/opt/android-studio/bin"
+
+# Create symlinks
 RUN ln -s /studio-data/profile/AndroidStudio$ANDROID_STUDIO_VERSION .AndroidStudio$ANDROID_STUDIO_VERSION
 RUN ln -s /studio-data/Android Android
 RUN ln -s /studio-data/profile/android .android
@@ -51,6 +63,8 @@ RUN ln -s /studio-data/profile/java .java
 RUN ln -s /studio-data/profile/gradle .gradle
 ENV ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
 
+### /Android Studio Install
+
 WORKDIR /home/$USER
 
-ENTRYPOINT [ "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT [ "/usr/local/bin/docker_entrypoint.sh" ]
