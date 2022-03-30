@@ -33,6 +33,35 @@ COPY provisioning/ndkTests.sh /usr/local/bin/ndkTests.sh
 RUN chmod +x /usr/local/bin/*
 COPY provisioning/51-android.rules /etc/udev/rules.d/51-android.rules
 
+### Flutter Install
+# Flutter version
+ENV FLUTTER_VERSION=flutter_linux_2.10.3-stable
+
+# Set user to $USER
+USER $USER
+
+# Change to $USER's homedir
+WORKDIR /home/$USER
+
+# Download flutter sdk
+RUN wget --no-verbose https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/${FLUTTER_VERSION}.tar.xz
+
+# untar flutter sdk
+RUN tar xf ${FLUTTER_VERSION}.tar.xz
+
+# Add flutter sdk to path
+ENV PATH="${PATH}:/home/${USER}/flutter/bin"
+
+# Pre-download development binaries
+RUN flutter precache
+
+# Disable flutter analytics
+RUN flutter config --no-analytics
+
+# Remove flutter tar
+RUN rm ${FLUTTER_VERSION}.tar.xz
+### /Flutter Install
+
 ### Android Studio Install
 # Set user to $USER
 USER $USER
@@ -65,6 +94,15 @@ ENV ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
 
 ### /Android Studio Install
 
-WORKDIR /home/$USER
+### Flutter SDK - Web specific stuff
+# Add Google Linux Signing key
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+# Add Google Apt repository
+RUN sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+
+# Install Google Chrome
+RUN sudo apt-get update && sudo apt-get install -y google-chrome-stable
+### /Flutter SDK - Web specific stuff
 
 ENTRYPOINT [ "/usr/local/bin/docker_entrypoint.sh" ]
